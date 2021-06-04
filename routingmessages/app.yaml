@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: routingmessages-scs
+  name: routingmessages-scs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: routingmessages-scs
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: routingmessages-scs
+    spec:
+      containers:
+        - image: routingmessages-scs:v5
+          name: routingmessages-scs
+          resources: {}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+          env:
+            - name: SPRING_RABBITMQ_USERNAME
+              value: "my-app"
+            - name: SPRING_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-my-app
+                  key: password
+            - name: SPRING_RABBITMQ_HOST
+              value: "rabbitmq.default.svc"
+            - name: JAVA_OPTS
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005"
+status: {}
