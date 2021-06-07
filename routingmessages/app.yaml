@@ -17,7 +17,7 @@ spec:
         app: routingmessages-scs
     spec:
       containers:
-        - image: routingmessages-scs:v5
+        - image: routingmessages-scs:v8
           name: routingmessages-scs
           resources: {}
           livenessProbe:
@@ -43,5 +43,5 @@ spec:
             - name: SPRING_RABBITMQ_HOST
               value: "rabbitmq.default.svc"
             - name: JAVA_OPTS
-              value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005"
+              value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 status: {}

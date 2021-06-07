@@ -1,0 +1,67 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+spec:
+  image: rabbitmq:3.8.9-management
+  override:
+    service:
+      metadata:
+        annotations:
+          prometheus.io/scrape: "true"
+          prometheus.io/port: "9419"
+  # affinity:
+  #   podAntiAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       - topologyKey: kubernetes.io/hostname
+  #         labelSelector:
+  #           # From https://www.rabbitmq.com/kubernetes/operator/using-operator.html#labels-annotations :
+  #           #   Labels and annotations in RabbitmqCluster metadata are propagated to the resources
+  #           #   created by the Operator. The Pods do not inherit these labels and/or annotations.
+  #           #
+  #           # The pods have some standard labels however, so we can use the `app.kubernetes.io/name` label
+  #           # here, which is set to the value of `.metadata.name` of the RabbitmqCluster CR
+  #           # (see https://www.rabbitmq.com/kubernetes/operator/using-operator.html#internal-labels).
+  #           #
+  #           matchLabels:
+  #             app.kubernetes.io/name: rabbitmq
+
+  persistence:
+    storage: 5Gi
+  rabbitmq:
+    additionalConfig: |
+      management_agent.disable_metrics_collector = false
+      vm_memory_high_watermark.relative = 0.6
+      vm_memory_high_watermark_paging_ratio = 0.9
+  # rabbitmq:
+  #   additionalConfig: |
+  #     ## Clustering
+  #     cluster_formation.peer_discovery_backend  = rabbit_peer_discovery_k8s
+  #     cluster_formation.k8s.host = kubernetes.default.svc.cluster.local
+  #     cluster_formation.node_cleanup.interval = 10
+  #     cluster_formation.node_cleanup.only_log_warning = true
+  #     cluster_partition_handling = autoheal
+  #     # queue master locator
+  #     queue_master_locator = min-masters
+  #     # enable guest user
+  #     loopback_users.guest = false
+  #     disk_free_limit.relative = 1.0
+  #     prometheus.return_per_object_metrics = true
+  #     ## Prometheus metrics
+  #     prometheus.tcp.port = 9419
+  #     # management
+  #     management_agent.disable_metrics_collector = false
+  #     vm_memory_high_watermark.relative = 0.6
+  #     vm_memory_high_watermark_paging_ratio = 0.9
+  #   additionalPlugins:
+  #   - rabbitmq_shovel
+  #   - rabbitmq_shovel_management
+  #   - rabbitmq_sharding
+  replicas: 1
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+  service:
+    type: ClusterIP
+  tls: {}
